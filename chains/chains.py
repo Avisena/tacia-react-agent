@@ -52,7 +52,7 @@ def create_memory_process_chain():
         partial_variables={"format_instructions": process_memory_parser.get_format_instructions()},
     )
 
-    process_memory_llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", max_tokens=2000, api_key = openai_api_key)
+    process_memory_llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", api_key = openai_api_key)
     process_memory_chain = process_memory_prompt | process_memory_llm | process_memory_parser
     return process_memory_chain
 
@@ -70,7 +70,7 @@ def create_planner_chain():
         template=planner_prompt,
         input_variables=["memory_based_question"], 
         )
-    planner_llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", max_tokens=2000, api_key = openai_api_key)
+    planner_llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", api_key = openai_api_key)
 
     planner = planner_prompt | planner_llm.with_structured_output(Plan)
     return planner
@@ -100,7 +100,7 @@ def create_react_agent_chain(callback_handler):
     Thought: {agent_scratchpad}
     """
     tools = [ask_ai, interact_human]
-    llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", max_tokens=2000, api_key = openai_api_key)
+    llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", api_key = openai_api_key)
     agent = create_react_agent(llm,tools, prompt)
     agent_executor = AgentExecutor(agent=agent,tools=tools, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True, callbacks=[callback_handler])
     return agent_executor

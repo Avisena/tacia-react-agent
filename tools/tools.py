@@ -51,7 +51,7 @@ def ask_ai(question):
             partial_variables={"format_instructions": process_answer_parser.get_format_instructions()},
         )
 
-        process_answer_llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", max_tokens=2000, api_key = openai_api_key)
+        process_answer_llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", api_key = openai_api_key)
         process_answer_chain = process_answer_prompt | process_answer_llm | process_answer_parser
         answer = process_answer_chain.invoke({"question": question})
         return answer
