@@ -1,0 +1,111 @@
+from langchain_openai import ChatOpenAI 
+from langchain.prompts import PromptTemplate
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.output_parsers import JsonOutputParser
+from typing import List
+from tools.tools import ask_ai, interact_human
+import streamlit as st
+from langchain_openai import ChatOpenAI 
+from langchain.prompts import PromptTemplate
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.output_parsers import JsonOutputParser
+from callbacks.callbacks import StopOnToolCallback
+import streamlit as st
+from typing import List
+from langchain import hub
+from langchain.agents import AgentExecutor, create_react_agent
+
+
+openai_api_key = st.secrets["OPENAI_API_KEY"]
+groq_api_key = st.secrets["GROQ_API_KEY"]
+
+class Plan(BaseModel):
+        """Plan to follow in future"""
+
+        steps: List[str] = Field(
+            description="langkah-langkah terurut yang harus diambil untuk melakukan permintaan pelanggan"
+        )
+
+def create_memory_process_chain():
+    class MemoryProcess(BaseModel):
+        """Remake question based on memory."""
+        memory_based_question : str = Field(description="processed memory.")
+
+    process_memory_parser = JsonOutputParser(pydantic_object=MemoryProcess)
+
+
+    process_memory_prompt_template = """ 
+    Riwayat percakapan:
+    {chat_history}
+
+    Tugas Anda adalah memeriksa dari riwayat percakapan apakah pertanyaan saat ini adalah lanjutan dari riwayat percakapan.
+    - Jika **YA**, reformulasikan pertanyaan agar berdiri sendiri.
+    - Jika **TIDAK**, kembalikan pertanyaan apa adanya tanpa perubahan.
+
+    Berikan hanya satu pertanyaan akhir sebagai hasil.
+    {format_instructions}
+   """
+
+    process_memory_prompt = PromptTemplate(
+        template=process_memory_prompt_template,
+        input_variables=["question", "chat_history"],
+        partial_variables={"format_instructions": process_memory_parser.get_format_instructions()},
+    )
+
+    process_memory_llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", max_tokens=2000, api_key = openai_api_key)
+    process_memory_chain = process_memory_prompt | process_memory_llm | process_memory_parser
+    return process_memory_chain
+
+def create_planner_chain():
+    planner_prompt =""" 
+    Anda adalah seorang konsultan pajak di Indonesia.
+    Anda menerima pertanyaan dari klien: {memory_based_question}.
+    Buatlah planning penalaran dengan cara berpikir seorang konsultan pajak yang tersusun atas apa yang harus anda cari tahu atau lakukan untuk menjawab pertanyaan klien.
+    Jangan menambahkan langkah yang tidak perlu.
+    Hasil dari langkah terakhir harus berupa jawaban akhir.
+    Pastikan setiap langkah memiliki semua informasi yang dibutuhkan — jangan melewatkan langkah apa pun.
+    """
+
+    planner_prompt = PromptTemplate(
+        template=planner_prompt,
+        input_variables=["memory_based_question"], 
+        )
+    planner_llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", max_tokens=2000, api_key = openai_api_key)
+
+    planner = planner_prompt | planner_llm.with_structured_output(Plan)
+    return planner
+
+def create_react_agent_chain(callback_handler):
+
+    prompt = hub.pull("hwchase17/react")
+    prompt.template = """Kamu adalah konsultan pajak ahli yang ditugaskan untuk membantu klien berkonsultasi perihal perpajakan di Indonesia. Gunakan bahasa yang santai tapi profesional.
+    
+    Kamu punya akses ke tools berikut:
+    {tools}
+
+    Use the following format:
+
+    Question: pertanyaan hukum yang perlu dijawab. Tujuan akhirmu adalah menjawab pertanyaan ini.   
+    Thought: Pahami masalah dan situasi klien. Pikirkan langkah demi langkah terstruktur tentang isu hukum yang dimaksud menggunakan pendekatan cara berpikir konsultan hukum. Berpikir lah secara luas. Selalu gunakan dasar hukum sebagai acuan.
+    Action: tindakan yang akan dilakukan berdasarkan langkah demi langkah yang telah kamu buat. Harus salah satu dari [{tool_names}]  
+    Action Input: Input untuk Action
+    Observation: Umpan balik dari action input
+    ... (this Thought/Action/Action Input/Observation can repeat N times)  
+    Thought: I now know the answer.
+    Final Answer: Jawaban akan pertanyaan. Tuangkan hasil reasoning anda dari Thought disertai pasal hukumnya secara terstruktur dan rapi.
+
+    Begin!
+
+    Question: {input}  
+    Thought: {agent_scratchpad}
+    """
+    tools = [ask_ai, interact_human]
+    llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", max_tokens=2000, api_key = openai_api_key)
+    agent = create_react_agent(llm,tools, prompt)
+    agent_executor = AgentExecutor(agent=agent,tools=tools, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True, callbacks=[callback_handler])
+    return agent_executor
+
+process_memory_chain = create_memory_process_chain()
+planner_chain = create_planner_chain()
+# callback_handler = StopOnToolCallback(stop_on_tool="interact_human")
+# react_agent_chain = create_react_agent_chain(callback_handler)
