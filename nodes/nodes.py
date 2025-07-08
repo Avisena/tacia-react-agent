@@ -53,19 +53,11 @@ def process_memory(state: PlanExecute):
     pprint("--------------------")
     input_values = {"chat_history": state['chat_history']}
     print("CURR_STATE: ", state['curr_state'])
-    if(state['curr_state'] != 'processing_react_agent'):
-        state["curr_state"] = "process_memory"
-        process_memory_output = process_memory_chain.invoke(input_values)
-        memory_based_question = process_memory_output["memory_based_question"]
-        print(f'memory_based_question: {memory_based_question}')
-        state['memory_based_question'] = memory_based_question
-
-    if(state['curr_state'] == 'processing_react_agent'):
-        print("INTERMEDIATE_STEPS: ", state['intermediate_steps'])
-        print("CHAT_HISTORY: ", state['chat_history'])
-        print(get_last_user_message(state['chat_history']))
-        state['intermediate_steps'] = insert_observation_for_last_interact_human(state['intermediate_steps'], get_last_user_message(state['chat_history']))
-        print("INSERT ANSWER TO INT STEPS: ", state['intermediate_steps'])
+    state["curr_state"] = "process_memory"
+    process_memory_output = process_memory_chain.invoke(input_values)
+    memory_based_question = process_memory_output["memory_based_question"]
+    print(f'memory_based_question: {memory_based_question}')
+    state['memory_based_question'] = memory_based_question
     return state
 
 
@@ -118,11 +110,23 @@ def self_reflection(state: PlanExecute):
     state["chat_history"].append({"role": "assistant", "content": state["response"]})
     return state
 
-def is_self_reflection(state):
+def is_self_reflection(state: PlanExecute):
     label = state.get("curr_state")
     if label == "finish_react_agent":
         return True
     
+    else:
+        return False
+
+def is_processing_react_agent(state: PlanExecute):
+    label = state.get("curr_state")
+    if label == "processing_react_agent":
+        print("INTERMEDIATE_STEPS: ", state['intermediate_steps'])
+        print("CHAT_HISTORY: ", state['chat_history'])
+        print(get_last_user_message(state['chat_history']))
+        state['intermediate_steps'] = insert_observation_for_last_interact_human(state['intermediate_steps'], get_last_user_message(state['chat_history']))
+        print("INSERT ANSWER TO INT STEPS: ", state['intermediate_steps'])
+        return True
     else:
         return False
 

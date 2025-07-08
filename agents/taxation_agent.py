@@ -1,10 +1,11 @@
 from langgraph.graph import END, StateGraph
+from langchain_core.runnables import RunnableLambda
 import streamlit as st
 from typing_extensions import TypedDict
 from typing import List, TypedDict
 
 ### Helper functions for the notebook
-from nodes.nodes import planner, process_memory, react_agent, self_reflection, is_self_reflection
+from nodes.nodes import planner, process_memory, react_agent, self_reflection, is_self_reflection, is_processing_react_agent
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 groq_api_key = st.secrets["GROQ_API_KEY"]
@@ -28,14 +29,24 @@ class PlanExecute(TypedDict):
 def create_agent():
     agent_workflow = StateGraph(PlanExecute)
 
-    agent_workflow.add_node("process_memory", process_memory)
     # agent_workflow.add_node("planner", planner)
+    agent_workflow.add_node("start", RunnableLambda(lambda state: state))
+    agent_workflow.add_node("process_memory", process_memory)
     agent_workflow.add_node("react_agent", react_agent)
     agent_workflow.add_node("self_reflection", self_reflection)
 
-    agent_workflow.set_entry_point("process_memory")
-    agent_workflow.add_edge("process_memory", "react_agent")
+    agent_workflow.set_entry_point("start")
+    agent_workflow.add_conditional_edges(
+    "start",
+    is_processing_react_agent,
+        {
+            True: "react_agent",
+            False: "process_memory",
+        }
+    )
+    # agent_workflow.add_edge("process_memory", "react_agent")
     # agent_workflow.add_edge("react_agent", "self_reflection")
+    agent_workflow.add_edge("process_memory", "react_agent")
     agent_workflow.add_conditional_edges(
     "react_agent",
     is_self_reflection,
@@ -45,8 +56,6 @@ def create_agent():
         }
     )
     agent_workflow.add_edge("self_reflection", END)
-
-    # agent_workflow.add_edge("self_reflection", END)
 
     plan_and_execute_app = agent_workflow.compile()
 
