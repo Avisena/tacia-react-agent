@@ -2,7 +2,7 @@ from pprint import pprint
 from typing_extensions import TypedDict
 from langchain.agents.agent import AgentAction, AgentFinish
 from typing import List, TypedDict
-from helpers.helpers import get_last_tool_input, insert_observation_for_last_interact_human, clean_agent_log, get_last_user_message
+from helpers.helpers import get_last_tool_input, insert_observation_for_last_interact_human, clean_agent_log, get_last_user_message, get_last_log
 from chains.chains import process_memory_chain, planner_chain, create_react_agent_chain, self_reflection_chain
 from callbacks.callbacks import StopOnToolCallback
 from tools.tools import ask_ai, interact_human, search_web
@@ -86,7 +86,6 @@ def react_agent(state:PlanExecute):
             answer = react_agent_chain.invoke(next_input)
         else:
             answer = continue_agent_reasoning(react_agent_chain, state['memory_based_question'], state['intermediate_steps'], callback_handler)
-            state["chat_history"].append({"role": "assistant", "content": clean_agent_log(answer["intermediate_steps"][-1][0].log)})
         print("ANSWER: ", answer)
         state['response'] = answer['output']
         state["curr_state"] = "finish_react_agent"
@@ -97,6 +96,8 @@ def react_agent(state:PlanExecute):
         state['intermediate_steps'].extend(callback_handler.intermediate_steps)
         print(f"Total saved steps length: {len(state['intermediate_steps'])}")
         print(f"Total saved steps: {state['intermediate_steps']}")
+        last_log = get_last_log(callback_handler.intermediate_steps)
+        state["chat_history"].append({"role": "assistant", "content": clean_agent_log(last_log)})
         state['chat_history'].append({"role": "assistant", "content": get_last_tool_input(callback_handler.intermediate_steps)})
     return state
 

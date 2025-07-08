@@ -9,6 +9,13 @@ def get_last_tool_input(intermediate_steps, tool_name="interact_human"):
             return action.tool_input
     return None
 
+def get_last_log(intermediate_steps, tool_name="interact_human"):
+    for step in reversed(intermediate_steps):
+        action = step if isinstance(step, AgentAction) else step[0]
+        if action.tool == tool_name:
+            return action.log
+    return None
+
 def insert_observation_for_last_interact_human(intermediate_steps, observation):
     """
     Insert observation for the last interact_human tool in intermediate steps
