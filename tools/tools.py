@@ -3,6 +3,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.tools import tool
+from langchain_community.tools import DuckDuckGoSearchResults
 import streamlit as st
 
 
@@ -55,3 +56,13 @@ def ask_ai(question):
         process_answer_chain = process_answer_prompt | process_answer_llm | process_answer_parser
         answer = process_answer_chain.invoke({"question": question})
         return answer
+
+@tool
+def search_web(query):
+    """
+    Gunakan ini untuk mencari informasi up-to-date dari internet. Fungsi ini menerima pertanyaan sebagai argumen.
+    query(str): the query
+    """
+    tool = DuckDuckGoSearchResults()
+    results = tool.run(query)
+    return(results)

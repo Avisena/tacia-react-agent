@@ -3,8 +3,10 @@ from typing_extensions import TypedDict
 from langchain.agents.agent import AgentAction, AgentFinish
 from typing import List, TypedDict
 from helpers.helpers import get_last_tool_input, insert_observation_for_last_interact_human, clean_agent_log, get_last_user_message
-from chains.chains import process_memory_chain, planner_chain, create_react_agent_chain
+from chains.chains import process_memory_chain, planner_chain, create_react_agent_chain, self_reflection_chain
 from callbacks.callbacks import StopOnToolCallback
+from tools.tools import ask_ai, interact_human, search_web
+
 
 class PlanExecute(TypedDict):
     curr_state: str
@@ -95,7 +97,6 @@ def react_agent(state:PlanExecute):
             state["chat_history"].append({"role": "assistant", "content": clean_agent_log(answer["intermediate_steps"][-1][0].log)})
         print("ANSWER: ", answer)
         state['response'] = answer['output']
-        state["chat_history"].append({"role": "assistant", "content": state["response"]})
         state["curr_state"] = "finish_react_agent"
         state["intermediate_steps"] = []
     except KeyboardInterrupt:
@@ -106,6 +107,24 @@ def react_agent(state:PlanExecute):
         print(f"Total saved steps: {state['intermediate_steps']}")
         state['chat_history'].append({"role": "assistant", "content": get_last_tool_input(callback_handler.intermediate_steps)})
     return state
+
+
+def self_reflection(state: PlanExecute):
+    state["curr_state"] = "self_reflection"
+    print("self_reflection step")
+    pprint("--------------------")
+    self_reflection = self_reflection_chain.invoke({"question": state['memory_based_question'], "answer": state["response"]})
+    state["response"] = self_reflection["improved_answer"]
+    state["chat_history"].append({"role": "assistant", "content": state["response"]})
+    return state
+
+def is_self_reflection(state):
+    label = state.get("curr_state")
+    if label == "finish_react_agent":
+        return True
+    
+    else:
+        return False
 
 def continue_agent_reasoning(agent_executor, input_text, intermediate_steps, callback_handler=None):
     """Continue agent reasoning from intermediate steps with callback support"""

@@ -3,7 +3,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.output_parsers import JsonOutputParser
 from typing import List
-from tools.tools import ask_ai, interact_human
+from tools.tools import ask_ai, interact_human, search_web
 import streamlit as st
 from langchain_openai import ChatOpenAI 
 from langchain.prompts import PromptTemplate
@@ -14,6 +14,9 @@ import streamlit as st
 from typing import List
 from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent
+from langchain.prompts import PromptTemplate
+from langchain.schema.runnable import RunnableMap, RunnablePassthrough, RunnableLambda
+from langchain.schema import StrOutputParser
 
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -86,7 +89,7 @@ def create_react_agent_chain(callback_handler):
     Use the following format:
 
     Question: pertanyaan hukum yang perlu dijawab. Tujuan akhirmu adalah menjawab pertanyaan ini.   
-    Thought: Pahami masalah dan situasi klien. Pikirkan langkah demi langkah terstruktur tentang isu hukum yang dimaksud menggunakan pendekatan cara berpikir konsultan hukum. Berpikir lah secara luas. Selalu gunakan dasar hukum sebagai acuan.
+    Thought: Pertimbangkan aturan perpajakan yang relevan dan informasi dari klien. Pikirkan langkah selanjutnya.
     Action: tindakan yang akan dilakukan berdasarkan langkah demi langkah yang telah kamu buat. Harus salah satu dari [{tool_names}]  
     Action Input: Input untuk Action
     Observation: Umpan balik dari action input
@@ -105,7 +108,64 @@ def create_react_agent_chain(callback_handler):
     agent_executor = AgentExecutor(agent=agent,tools=tools, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True, callbacks=[callback_handler])
     return agent_executor
 
+def create_self_reflection_chain():
+    reflection_prompt = PromptTemplate.from_template("""
+        Kamu telah memberikan jawaban berikut untuk pertanyaan terkait perpajakan:
+
+        Pertanyaan: {question}
+        Jawaban: {answer}
+
+        Sekarang lakukan refleksi terhadap jawaban tersebut dengan mempertimbangkan:
+        - Apakah semua jenis pajak yang relevan sudah disebutkan?
+        - Apakah dasar hukum atau peraturan pajak yang berlaku sudah dijelaskan?
+        - Apakah logika penarikan kesimpulan sudah tepat dan sesuai konteks?
+        - Apakah ada informasi penting atau pengecualian yang terlewat?
+        - Apakah ada asumsi yang tidak dijelaskan secara eksplisit?
+
+        Tuliskan refleksi singkat kamu sebagai konsultan pajak profesional.
+        """)
+
+
+    improvement_prompt = PromptTemplate.from_template("""
+        Pertanyaan: {question}
+        Jawaban Awal: {answer}
+        Refleksi: {reflection}
+
+        Sebagai konsultan pajak profesional, perbaiki jawaban awal di atas berdasarkan refleksi yang sudah dilakukan.
+        Pastikan:
+        - Menyebutkan aturan perpajakan yang relevan (misalnya, PP, UU, PMK).
+        - Menjelaskan kewajiban atau pengecualian secara jelas.
+        - Memberikan saran yang akurat dan mudah dipahami oleh klien.
+
+        Tulis ulang jawaban direvisi dengan lebih baik. Tulis hanya jawaban revisinya tanpa yang lain.
+        """)
+
+    llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", api_key = openai_api_key)
+    reflection_chain = RunnableMap({
+        "question": lambda x: x["question"],
+        "answer": lambda x: x["answer"]
+    }) | reflection_prompt | llm | StrOutputParser()
+    
+    improvement_chain = RunnableMap({
+        "question": lambda x: x["question"],
+        "answer": lambda x: x["answer"],
+        "reflection": reflection_chain
+    }) | improvement_prompt | llm | StrOutputParser()
+
+    self_reflection_chain = RunnableMap({
+    "question": lambda x: x["question"],
+    "answer": lambda x: x["answer"]
+    }) | RunnableLambda(lambda x: {
+        "question": x["question"],
+        "reflection": reflection_chain.invoke(x),
+        "improved_answer": improvement_chain.invoke(x)
+    })
+
+    return self_reflection_chain
+
+
 process_memory_chain = create_memory_process_chain()
 planner_chain = create_planner_chain()
+self_reflection_chain = create_self_reflection_chain()
 # callback_handler = StopOnToolCallback(stop_on_tool="interact_human")
 # react_agent_chain = create_react_agent_chain(callback_handler)

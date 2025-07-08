@@ -4,7 +4,7 @@ from typing_extensions import TypedDict
 from typing import List, TypedDict
 
 ### Helper functions for the notebook
-from nodes.nodes import planner, process_memory, react_agent
+from nodes.nodes import planner, process_memory, react_agent, self_reflection, is_self_reflection
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 groq_api_key = st.secrets["GROQ_API_KEY"]
@@ -28,14 +28,25 @@ class PlanExecute(TypedDict):
 def create_agent():
     agent_workflow = StateGraph(PlanExecute)
 
-    # Add the anonymize node
     agent_workflow.add_node("process_memory", process_memory)
     # agent_workflow.add_node("planner", planner)
     agent_workflow.add_node("react_agent", react_agent)
-    # Set the entry point
+    agent_workflow.add_node("self_reflection", self_reflection)
+
     agent_workflow.set_entry_point("process_memory")
     agent_workflow.add_edge("process_memory", "react_agent")
-    agent_workflow.add_edge("react_agent", END)
+    # agent_workflow.add_edge("react_agent", "self_reflection")
+    agent_workflow.add_conditional_edges(
+    "react_agent",
+    is_self_reflection,
+        {
+            True: "self_reflection",
+            False: END,
+        }
+    )
+    agent_workflow.add_edge("self_reflection", END)
+
+    # agent_workflow.add_edge("self_reflection", END)
 
     plan_and_execute_app = agent_workflow.compile()
 
