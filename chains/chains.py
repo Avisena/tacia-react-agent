@@ -102,7 +102,7 @@ def create_react_agent_chain(callback_handler):
     Question: {input}  
     Thought: {agent_scratchpad}
     """
-    tools = [ask_ai, interact_human]
+    tools = [ask_ai, interact_human, search_web]
     llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", api_key = openai_api_key)
     agent = create_react_agent(llm,tools, prompt)
     agent_executor = AgentExecutor(agent=agent,tools=tools, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True, callbacks=[callback_handler])
@@ -116,7 +116,6 @@ def create_self_reflection_chain():
         Jawaban: {answer}
 
         Sekarang lakukan refleksi terhadap jawaban tersebut dengan mempertimbangkan:
-        - Apakah semua jenis pajak yang relevan sudah disebutkan?
         - Apakah dasar hukum atau peraturan pajak yang berlaku sudah dijelaskan?
         - Apakah logika penarikan kesimpulan sudah tepat dan sesuai konteks?
         - Apakah ada informasi penting atau pengecualian yang terlewat?
@@ -136,6 +135,7 @@ def create_self_reflection_chain():
         - Menyebutkan aturan perpajakan yang relevan (misalnya, PP, UU, PMK).
         - Menjelaskan kewajiban atau pengecualian secara jelas.
         - Memberikan saran yang akurat dan mudah dipahami oleh klien.
+        - Format penulisan markdown yang nyaman dibaca
 
         Tulis ulang jawaban direvisi dengan lebih baik. Tulis hanya jawaban revisinya tanpa yang lain.
         """)

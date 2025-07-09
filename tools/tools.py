@@ -60,9 +60,11 @@ def ask_ai(question):
 @tool
 def search_web(query):
     """
-    Gunakan ini untuk mencari informasi up-to-date dari internet. Fungsi ini menerima pertanyaan sebagai argumen.
+    Pengetahuan anda hanya sampai tahun 2023. Sekarang adalah Juli 2025.
+    Gunakan ini untuk mencari informasi up-to-date dari internet terkait aturan terbaru, pasal terbaru, dll.
     query(str): the query
     """
     tool = DuckDuckGoSearchResults()
     results = tool.run(query)
+    print(f"Web result: {results}")
     return(results)

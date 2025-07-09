@@ -97,7 +97,7 @@ def react_agent(state:PlanExecute):
         print(f"Total saved steps length: {len(state['intermediate_steps'])}")
         print(f"Total saved steps: {state['intermediate_steps']}")
         last_log = get_last_log(callback_handler.intermediate_steps)
-        state["chat_history"].append({"role": "assistant", "content": clean_agent_log(last_log)})
+        state["chat_history"].append({"role": "assistant_reasoning", "content": clean_agent_log(last_log)})
         state['chat_history'].append({"role": "assistant", "content": get_last_tool_input(callback_handler.intermediate_steps)})
     return state
 
@@ -114,10 +114,10 @@ def self_reflection(state: PlanExecute):
 def is_self_reflection(state: PlanExecute):
     label = state.get("curr_state")
     if label == "finish_react_agent":
-        return True
+        return "finish_react_agent"
     
     else:
-        return False
+        return "not_finish_react_agent"
 
 def is_processing_react_agent(state: PlanExecute):
     label = state.get("curr_state")
@@ -127,9 +127,9 @@ def is_processing_react_agent(state: PlanExecute):
         print(get_last_user_message(state['chat_history']))
         state['intermediate_steps'] = insert_observation_for_last_interact_human(state['intermediate_steps'], get_last_user_message(state['chat_history']))
         print("INSERT ANSWER TO INT STEPS: ", state['intermediate_steps'])
-        return True
+        return "processing_react_agent"
     else:
-        return False
+        return "not_processing_react_agent"
 
 def continue_agent_reasoning(agent_executor, input_text, intermediate_steps, callback_handler=None):
     """Continue agent reasoning from intermediate steps with callback support"""

@@ -75,6 +75,15 @@ st.markdown("""
             text-align: left;
             margin-right: auto;
         }
+        .assistant-reasoning {
+            background-color: #FFF8DC; /* light yellow */
+            font-style: italic;
+            border-left: 4px dashed #D4A017;
+            padding-left: 1rem;
+            margin-right: auto;
+            font-size: 0.95rem;
+            color: #555;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -106,12 +115,22 @@ st.markdown(f"""
 
 # --- RENDER CHAT BUBBLES ---
 for msg in st.session_state.last_result.get("chat_history", []):
-    is_user = msg["role"] == "user"
-    bubble_class = "user" if is_user else "assistant"
+    role = msg["role"]
+    is_user = role == "user"
+
+    if role == "assistant_reasoning":
+        bubble_class = "assistant-reasoning"
+        prefix = "🧠 I think:"  # Optional icon to indicate internal reasoning
+    else:
+        bubble_class = "user" if is_user else "assistant"
+        prefix = ""
+
     cols = st.columns([0.3, 0.7]) if is_user else st.columns([0.7, 0.3])
 
     with cols[1] if is_user else cols[0]:
         st.markdown(
-            f"<div class='chat-bubble {bubble_class}'>{markdown.markdown(msg['content'])}</div>",
+            f"<div class='chat-bubble {bubble_class}'>{prefix}{markdown.markdown(msg['content'])}</div>",
             unsafe_allow_html=True
         )
+
+

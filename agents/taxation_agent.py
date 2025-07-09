@@ -40,8 +40,8 @@ def create_agent():
     "start",
     is_processing_react_agent,
         {
-            True: "react_agent",
-            False: "process_memory",
+            "processing_react_agent": "react_agent",
+            "not_processing_react_agent": "process_memory",
         }
     )
     # agent_workflow.add_edge("process_memory", "react_agent")
@@ -51,12 +51,21 @@ def create_agent():
     "react_agent",
     is_self_reflection,
         {
-            True: "self_reflection",
-            False: END,
+            "finish_react_agent": "self_reflection",
+            "not_finish_react_agent": END,
         }
     )
     agent_workflow.add_edge("self_reflection", END)
 
     plan_and_execute_app = agent_workflow.compile()
+    
+    try:
+        png_data = plan_and_execute_app.get_graph().draw_mermaid_png()
+        with open("workflow_diagram.png", "wb") as f:
+            f.write(png_data)
+        print("Graph saved as workflow_diagram.png")
+    except Exception as e:
+        print(f"PNG save failed: {e}")
+
 
     return plan_and_execute_app
