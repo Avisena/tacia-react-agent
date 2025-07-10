@@ -92,7 +92,7 @@ def create_react_agent_chain(callback_handler):
 
     Question: pertanyaan hukum yang perlu dijawab. Tujuan akhirmu adalah menjawab pertanyaan ini.   
     Thought: Berdasarkan Question di atas, pertimbangkan reasoning untuk menjawabnya dengan aturan perpajakan yang relevan dan informasi dari klien. 
-    Action: tindakan yang akan dilakukan berdasarkan langkah demi langkah yang telah kamu buat. Harus salah satu dari [{tool_names}]  
+    Action: tindakan yang akan dilakukan. Harus salah satu dari [{tool_names}]  
     Action Input: Input untuk Action
     Observation: Umpan balik dari action input
     ... (this Thought/Action/Action Input/Observation can repeat N times)  

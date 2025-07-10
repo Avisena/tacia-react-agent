@@ -13,6 +13,7 @@ groq_api_key = st.secrets["GROQ_API_KEY"]
 @tool
 def interact_human(question):
     """
+    Ini adalah panel komunikasi dengan klien.
     Gunakan ini hanya jika Anda perlu berinteraksi dengan manusia.
     1. Contoh ketika input dari pengguna tidak memuat cukup informasi pribadi mereka dan Anda perlu menanyakan lebih lanjut (just enough information to be asked).
     Contohnya: gaji mereka, preferensi mereka, kota tempat tinggal mereka, dan sebagainya.
