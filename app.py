@@ -181,7 +181,7 @@ with chat_container:
         with cols[1] if is_user else cols[0]:
             # Safely render markdown content
             try:
-                rendered_content = f"<pre>{content}</pre>"
+                rendered_content = f"<div style='white-space: pre-wrap'>{content}</div>"
             except Exception as e:
                 rendered_content = content  # Fallback to plain text
                 
@@ -189,6 +189,7 @@ with chat_container:
                 f"<div class='chat-bubble {bubble_class}'>{prefix}{rendered_content}</div>",
                 unsafe_allow_html=True
             )
+
 
     
     st.markdown('</div>', unsafe_allow_html=True)  # Close chat-wrapper
