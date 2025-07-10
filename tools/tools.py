@@ -18,7 +18,7 @@ def interact_human(question):
     1. Contoh ketika input dari pengguna tidak memuat cukup informasi pribadi mereka dan Anda perlu menanyakan lebih lanjut (just enough information to be asked).
     Contohnya: gaji mereka, preferensi mereka, kota tempat tinggal mereka, dan sebagainya.
 
-    2. Gunakan ini untuk memberikan penjelasan dan saran kepada pengguna.
+    2. Gunakan ini untuk memberikan penjelasan terkait kepada pengguna.
     Args:
         question (str): The question to ask the human.
 
