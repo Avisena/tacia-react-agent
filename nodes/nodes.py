@@ -87,6 +87,7 @@ def react_agent(state:PlanExecute):
         else:
             answer = continue_agent_reasoning(react_agent_chain, state['memory_based_question'], state['intermediate_steps'], callback_handler)
         print("ANSWER: ", answer)
+        state["chat_history"].append({"role": "assistant_reasoning", "content": clean_agent_log(answer['log'])})
         state['response'] = answer['output']
         state["curr_state"] = "finish_react_agent"
         state["intermediate_steps"] = []
