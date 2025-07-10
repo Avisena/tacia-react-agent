@@ -3,7 +3,7 @@ from typing_extensions import TypedDict
 from langchain.agents.agent import AgentAction, AgentFinish
 from typing import List, TypedDict
 from helpers.helpers import get_last_tool_input, insert_observation_for_last_interact_human, clean_agent_log, get_last_user_message, get_last_log
-from chains.chains import process_memory_chain, planner_chain, create_react_agent_chain, self_reflection_chain
+from chains.chains import process_memory_chain, planner_chain, create_react_agent_chain, self_reflection_chain, semantic_summary_chain
 from callbacks.callbacks import StopOnToolCallback
 from tools.tools import ask_ai, interact_human, search_web
 
@@ -101,7 +101,6 @@ def react_agent(state:PlanExecute):
         state['chat_history'].append({"role": "assistant", "content": get_last_tool_input(callback_handler.intermediate_steps)})
     return state
 
-
 def self_reflection(state: PlanExecute):
     state["curr_state"] = "self_reflection"
     print("self_reflection step")
@@ -110,6 +109,16 @@ def self_reflection(state: PlanExecute):
     state["response"] = self_reflection["improved_answer"]
     state["chat_history"].append({"role": "assistant", "content": state["response"]})
     return state
+
+
+def semantic_summary(state: PlanExecute):
+    print("semantic summary step")
+    pprint("--------------------")
+    print(">>> RAW STATE:", state)
+    print(">>> TYPE OF STATE:", type(state))
+    # # print(f"MEMORY BASED QUESTION: {state["memory_based_question"]}")
+    # semantic_summary = semantic_summary_chain.invoke({"user_input": state['memory_based_question']})
+    # print("Semantic Summary: ", semantic_summary['content'])
 
 def is_self_reflection(state: PlanExecute):
     label = state.get("curr_state")

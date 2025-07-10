@@ -9,14 +9,16 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.output_parsers import JsonOutputParser
-from callbacks.callbacks import StopOnToolCallback
 import streamlit as st
 from typing import List
 from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain.prompts import PromptTemplate
-from langchain.schema.runnable import RunnableMap, RunnablePassthrough, RunnableLambda
+from langchain.schema.runnable import RunnableMap, RunnableLambda
 from langchain.schema import StrOutputParser
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+
 
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -81,7 +83,7 @@ def create_planner_chain():
 def create_react_agent_chain(callback_handler):
 
     prompt = hub.pull("hwchase17/react")
-    prompt.template = """Kamu adalah konsultan pajak ahli yang ditugaskan untuk membantu klien berkonsultasi perihal perpajakan di Indonesia. Gunakan bahasa yang santai tapi profesional.
+    prompt.template = """Kamu adalah konsultan pajak ahli yang ditugaskan untuk membantu klien berkonsultasi perihal perpajakan di Indonesia. Kamu akan memiliki percakapan/dialog dengan klien. Gunakan bahasa yang santai tapi profesional.
     
     Kamu punya akses ke tools berikut:
     {tools}
@@ -89,7 +91,7 @@ def create_react_agent_chain(callback_handler):
     Use the following format:
 
     Question: pertanyaan hukum yang perlu dijawab. Tujuan akhirmu adalah menjawab pertanyaan ini.   
-    Thought: Pertimbangkan aturan perpajakan yang relevan dan informasi dari klien. Pikirkan langkah selanjutnya.
+    Thought: Berdasarkan Question di atas, pertimbangkan reasoning untuk menjawabnya dengan aturan perpajakan yang relevan dan informasi dari klien. 
     Action: tindakan yang akan dilakukan berdasarkan langkah demi langkah yang telah kamu buat. Harus salah satu dari [{tool_names}]  
     Action Input: Input untuk Action
     Observation: Umpan balik dari action input
@@ -163,9 +165,39 @@ def create_self_reflection_chain():
 
     return self_reflection_chain
 
+def create_semantic_summary_chain():
+    """
+    Creates a LangChain LLMChain that generates a semantic summary 
+    of a user message for long-term memory storage.
+    
+    Parameters:
+        llm (BaseLanguageModel): Optional custom LLM. If None, uses ChatOpenAI.
+
+    Returns:
+        LLMChain: A LangChain chain that accepts 'user_input' and returns a summary.
+    """
+
+    llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", api_key = openai_api_key)
+    prompt = """
+        Kamu adalah agen AI yang bertugas merangkum informasi penting dari pengguna.
+
+        Ringkas pesan berikut menjadi satu kalimat padat dan faktual yang menjelaskan kekhawatiran, tujuan, atau latar belakang pengguna. Hindari detail yang tidak penting atau pengulangan.
+
+        Pesan pengguna:
+        "{user_input}"
+
+        Ringkasan:
+        """ 
+    semantic_summary_prompt = PromptTemplate(
+        template=prompt,
+        input_variables=["user_input"], 
+    )
+    semantic_summary = semantic_summary_prompt | llm
+    return semantic_summary
 
 process_memory_chain = create_memory_process_chain()
 planner_chain = create_planner_chain()
 self_reflection_chain = create_self_reflection_chain()
+semantic_summary_chain = create_semantic_summary_chain()
 # callback_handler = StopOnToolCallback(stop_on_tool="interact_human")
 # react_agent_chain = create_react_agent_chain(callback_handler)
