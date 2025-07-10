@@ -83,7 +83,7 @@ def create_planner_chain():
 def create_react_agent_chain(callback_handler):
 
     prompt = hub.pull("hwchase17/react")
-    prompt.template = """Kamu adalah konsultan pajak ahli yang ditugaskan untuk membantu klien berkonsultasi perihal perpajakan di Indonesia. Kamu akan memiliki percakapan/dialog dengan klien. Gunakan bahasa yang santai tapi profesional.
+    prompt.template = """Kamu adalah konsultan pajak ahli yang ditugaskan untuk membantu klien berkonsultasi perihal perpajakan di Indonesia. Kamu Gunakan bahasa yang santai tapi profesional.
     
     Kamu punya akses ke tools berikut:
     {tools}
@@ -91,8 +91,8 @@ def create_react_agent_chain(callback_handler):
     Use the following format:
 
     Question: pertanyaan hukum yang perlu dijawab. Tujuan akhirmu adalah menjawab pertanyaan ini.   
-    Thought: Berdasarkan Question di atas, pertimbangkan reasoning untuk menjawabnya dengan aturan perpajakan yang relevan dan informasi dari klien. 
-    Action: tindakan yang akan dilakukan. Harus salah satu dari [{tool_names}]  
+    Thought: Pertimbangkan aturan perpajakan yang relevan dan informasi dari klien. Pikirkan langkah selanjutnya.
+    Action: tindakan yang akan dilakukan berdasarkan langkah demi langkah yang telah kamu buat. Harus salah satu dari [{tool_names}]  
     Action Input: Input untuk Action
     Observation: Umpan balik dari action input
     ... (this Thought/Action/Action Input/Observation can repeat N times)  
