@@ -11,14 +11,19 @@ openai_api_key = st.secrets["OPENAI_API_KEY"]
 groq_api_key = st.secrets["GROQ_API_KEY"]
 
 @tool
-def interact_human(question):
+def interact_with_human(question):
     """
-    Ini adalah panel komunikasi dengan klien.
-    Gunakan ini hanya jika Anda perlu berinteraksi dengan manusia.
-    1. Contoh ketika input dari pengguna tidak memuat cukup informasi pribadi mereka dan Anda perlu menanyakan lebih lanjut (just enough information to be asked).
-    Contohnya: gaji mereka, preferensi mereka, kota tempat tinggal mereka, dan sebagainya.
+    1.  Gunakan tool ini ketika kamu membutuhkan informasi tambahan dari manusia yang tidak tersedia dalam pertanyaan awal. Misalnya, saat informasi tidak lengkap, ambigu, atau butuh klarifikasi lanjutan dari penanya untuk bisa menjawab dengan akurat. Tool ini akan mengajukan pertanyaan langsung ke manusia.
+
+        Tool ini sangat penting untuk menghindari asumsi yang salah dalam konteks perpajakan.
+
+        Contoh penggunaan:
+        - Menanyakan sumber penghasilan jika hanya disebut "penghasilan 50 juta".
+        - Meminta rincian apakah transaksi termasuk PPN.
+        - Klarifikasi apakah donasi dilakukan ke lembaga resmi yang diakui negara.
 
     2. Gunakan ini untuk memberikan penjelasan terkait kepada pengguna.
+
     Args:
         question (str): The question to ask the human.
 

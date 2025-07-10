@@ -143,7 +143,7 @@ def create_react_agent_chain(callback_handler):
         return answer
 
     @tool
-    def interact_human(question):
+    def interact_with_human(question):
         """
         Gunakan ini hanya jika Anda perlu berinteraksi dengan manusia.
         1. Contoh ketika input dari pengguna tidak memuat cukup informasi pribadi mereka dan Anda perlu menanyakan lebih lanjut.
@@ -180,7 +180,7 @@ def create_react_agent_chain(callback_handler):
     Question: {input}  
     Thought: {agent_scratchpad}
     """
-    tools = [ask_ai, interact_human]
+    tools = [ask_ai, interact_with_human]
     llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", max_tokens=2000, api_key = openai_api_key)
     agent = create_react_agent(llm,tools, prompt)
     agent_executor = AgentExecutor(agent=agent,tools=tools, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True, callbacks=[callback_handler])
@@ -291,7 +291,7 @@ def react_agent(state:PlanExecute):
     Returns:
         The updated state with the plan.
     """
-    callback_handler = StopOnToolCallback(stop_on_tool="interact_human")
+    callback_handler = StopOnToolCallback(stop_on_tool="interact_with_human")
     react_agent_chain = create_react_agent_chain(callback_handler)
     state["curr_state"] = "processing_react_agent"
     print("React agent step")

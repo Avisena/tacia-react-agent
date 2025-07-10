@@ -3,7 +3,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.output_parsers import JsonOutputParser
 from typing import List
-from tools.tools import ask_ai, interact_human, search_web
+from tools.tools import ask_ai, interact_with_human, search_web
 import streamlit as st
 from langchain_openai import ChatOpenAI 
 from langchain.prompts import PromptTemplate
@@ -83,7 +83,10 @@ def create_planner_chain():
 def create_react_agent_chain(callback_handler):
 
     prompt = hub.pull("hwchase17/react")
-    prompt.template = """Kamu adalah konsultan pajak ahli yang ditugaskan untuk membantu klien berkonsultasi perihal perpajakan di Indonesia. Kamu Gunakan bahasa yang santai tapi profesional.
+    prompt.template = """
+    Namamu Tacia, kamu adalah konsultan pajak ahli yang ditugaskan untuk membantu klien berkonsultasi perihal perpajakan di Indonesia. 
+    Berpihaklah pada sisi pembayar pajak, bukan pemerintah. Pembayar pajak ingin sesedikit mungkin membayar pajak dengan cara legal.
+    Gunakan bahasa yang santai tapi profesional.
     
     Kamu punya akses ke tools berikut:
     {tools}
@@ -91,9 +94,9 @@ def create_react_agent_chain(callback_handler):
     Use the following format:
 
     Question: pertanyaan hukum yang perlu dijawab. Tujuan akhirmu adalah menjawab pertanyaan ini.   
-    Thought: Pertimbangkan aturan perpajakan yang relevan dan informasi dari klien. Pikirkan langkah selanjutnya.
-    Action: tindakan yang akan dilakukan berdasarkan langkah demi langkah yang telah kamu buat. Harus salah satu dari [{tool_names}]  
-    Action Input: Input untuk Action
+    Thought: Gunakan penalaranmu untuk merespons masukan klien. Pertimbangkan aturan perpajakan yang relevan dan informasi dari klien
+    Action: Harus salah satu dari [{tool_names}]. Nama fungsi/tool yang akan dipakai — hanya nama fungsi saja, tanpa tanda kurung atau parameter
+    Action Input: Parameter Input untuk Action
     Observation: Umpan balik dari action input
     ... (this Thought/Action/Action Input/Observation can repeat N times)  
     Thought: I now know the answer.
@@ -104,7 +107,7 @@ def create_react_agent_chain(callback_handler):
     Question: {input}  
     Thought: {agent_scratchpad}
     """
-    tools = [ask_ai, interact_human, search_web]
+    tools = [ask_ai, interact_with_human]
     llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", api_key = openai_api_key)
     agent = create_react_agent(llm,tools, prompt)
     agent_executor = AgentExecutor(agent=agent,tools=tools, handle_parsing_errors=True, verbose=True, return_intermediate_steps=True, callbacks=[callback_handler])
@@ -136,7 +139,6 @@ def create_self_reflection_chain():
         Pastikan:
         - Menyebutkan aturan perpajakan yang relevan (misalnya, PP, UU, PMK).
         - Menjelaskan kewajiban atau pengecualian secara jelas.
-        - Memberikan saran yang akurat dan mudah dipahami oleh klien.
         - Format penulisan markdown yang nyaman dibaca
 
         Tulis ulang jawaban direvisi dengan lebih baik. Tulis hanya jawaban revisinya tanpa yang lain.
@@ -199,5 +201,5 @@ process_memory_chain = create_memory_process_chain()
 planner_chain = create_planner_chain()
 self_reflection_chain = create_self_reflection_chain()
 semantic_summary_chain = create_semantic_summary_chain()
-# callback_handler = StopOnToolCallback(stop_on_tool="interact_human")
+# callback_handler = StopOnToolCallback(stop_on_tool="interact_with_human")
 # react_agent_chain = create_react_agent_chain(callback_handler)

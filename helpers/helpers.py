@@ -2,14 +2,14 @@ from langchain.agents.agent import AgentAction
 import re
 from typing import Dict, List, Optional
 
-def get_last_tool_input(intermediate_steps, tool_name="interact_human"):
+def get_last_tool_input(intermediate_steps, tool_name="interact_with_human"):
     for step in reversed(intermediate_steps):
         action = step if isinstance(step, AgentAction) else step[0]
         if action.tool == tool_name:
             return action.tool_input
     return None
 
-def get_last_log(intermediate_steps, tool_name="interact_human"):
+def get_last_log(intermediate_steps, tool_name="interact_with_human"):
     for step in reversed(intermediate_steps):
         action = step if isinstance(step, AgentAction) else step[0]
         if action.tool == tool_name:
@@ -18,7 +18,7 @@ def get_last_log(intermediate_steps, tool_name="interact_human"):
 
 def insert_observation_for_last_interact_human(intermediate_steps, observation):
     """
-    Insert observation for the last interact_human tool in intermediate steps
+    Insert observation for the last interact_with_human tool in intermediate steps
     
     Args:
         intermediate_steps: List of AgentAction or (AgentAction, observation) tuples
@@ -30,20 +30,20 @@ def insert_observation_for_last_interact_human(intermediate_steps, observation):
     if not intermediate_steps:
         return intermediate_steps
     
-    # Work backwards to find the last interact_human
+    # Work backwards to find the last interact_with_human
     for i in range(len(intermediate_steps) - 1, -1, -1):
         step = intermediate_steps[i]
         
         # Case 1: step is a tuple (AgentAction, observation)
         if isinstance(step, tuple) and len(step) == 2:
             action, existing_observation = step
-            if hasattr(action, 'tool') and action.tool == 'interact_human':
+            if hasattr(action, 'tool') and action.tool == 'interact_with_human':
                 # Update the observation
                 intermediate_steps[i] = (action, f"User menjawab: {observation}")
                 return intermediate_steps
         
         # Case 2: step is just an AgentAction (no observation yet)
-        elif hasattr(step, 'tool') and step.tool == 'interact_human':
+        elif hasattr(step, 'tool') and step.tool == 'interact_with_human':
             # Convert to tuple with observation
             intermediate_steps[i] = (step, f"User menjawab: {observation}")
             return intermediate_steps

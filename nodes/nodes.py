@@ -5,7 +5,7 @@ from typing import List, TypedDict
 from helpers.helpers import get_last_tool_input, insert_observation_for_last_interact_human, clean_agent_log, get_last_user_message, get_last_log
 from chains.chains import process_memory_chain, planner_chain, create_react_agent_chain, self_reflection_chain, semantic_summary_chain
 from callbacks.callbacks import StopOnToolCallback
-from tools.tools import ask_ai, interact_human, search_web
+from tools.tools import ask_ai, interact_with_human, search_web
 
 
 class PlanExecute(TypedDict):
@@ -69,7 +69,7 @@ def react_agent(state:PlanExecute):
     Returns:
         The updated state with the plan.
     """
-    callback_handler = StopOnToolCallback(stop_on_tool="interact_human")
+    callback_handler = StopOnToolCallback(stop_on_tool="interact_with_human")
     react_agent_chain = create_react_agent_chain(callback_handler)
     state["curr_state"] = "processing_react_agent"
     print("React agent step")
@@ -86,8 +86,8 @@ def react_agent(state:PlanExecute):
             answer = react_agent_chain.invoke(next_input)
         else:
             answer = continue_agent_reasoning(react_agent_chain, state['memory_based_question'], state['intermediate_steps'], callback_handler)
-            print("ANSWER: ", answer)
             state["chat_history"].append({"role": "assistant_reasoning", "content": clean_agent_log(answer['log'])})
+        print("ANSWER: ", answer)
         state['response'] = answer['output']
         state["curr_state"] = "finish_react_agent"
         state["intermediate_steps"] = []
