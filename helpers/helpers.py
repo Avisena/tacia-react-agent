@@ -9,10 +9,10 @@ def get_last_tool_input(intermediate_steps, tool_name="interact_with_human"):
             return action.tool_input
     return None
 
-def get_last_log(intermediate_steps, tool_name="interact_with_human"):
+def get_last_log(intermediate_steps, tool_name=None):
     for step in reversed(intermediate_steps):
         action = step if isinstance(step, AgentAction) else step[0]
-        if action.tool == tool_name:
+        if tool_name is None or action.tool == tool_name:
             return action.log
     return None
 

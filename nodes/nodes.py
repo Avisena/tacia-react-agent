@@ -84,6 +84,8 @@ def react_agent(state:PlanExecute):
         if len(state['intermediate_steps']) == 0:
             print("ENTERING 0 INTERMEDIATE STEPS")
             answer = react_agent_chain.invoke(next_input)
+            last_log = get_last_log(answer['intermediate_steps'])
+            state["chat_history"].append({"role": "assistant_reasoning", "content": clean_agent_log(last_log)})
         else:
             answer = continue_agent_reasoning(react_agent_chain, state['memory_based_question'], state['intermediate_steps'], callback_handler)
             state["chat_history"].append({"role": "assistant_reasoning", "content": clean_agent_log(answer['log'])})
@@ -97,7 +99,7 @@ def react_agent(state:PlanExecute):
         state['intermediate_steps'].extend(callback_handler.intermediate_steps)
         print(f"Total saved steps length: {len(state['intermediate_steps'])}")
         print(f"Total saved steps: {state['intermediate_steps']}")
-        last_log = get_last_log(callback_handler.intermediate_steps)
+        last_log = get_last_log(callback_handler.intermediate_steps, "interact_human")
         state["chat_history"].append({"role": "assistant_reasoning", "content": clean_agent_log(last_log)})
         state['chat_history'].append({"role": "assistant", "content": get_last_tool_input(callback_handler.intermediate_steps)})
     return state

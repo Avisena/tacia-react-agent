@@ -11,7 +11,7 @@ openai_api_key = st.secrets["OPENAI_API_KEY"]
 groq_api_key = st.secrets["GROQ_API_KEY"]
 
 @tool
-def interact_with_human(question):
+def interact_with_human(message):
     """
     1.  Gunakan tool ini ketika kamu membutuhkan informasi tambahan dari manusia yang tidak tersedia dalam pertanyaan awal. Misalnya, saat informasi tidak lengkap, ambigu, atau butuh klarifikasi lanjutan dari penanya untuk bisa menjawab dengan akurat. Tool ini akan mengajukan pertanyaan langsung ke manusia.
 
@@ -22,15 +22,15 @@ def interact_with_human(question):
         - Meminta rincian apakah transaksi termasuk PPN.
         - Klarifikasi apakah donasi dilakukan ke lembaga resmi yang diakui negara.
 
-    2. Gunakan ini untuk memberikan penjelasan terkait kepada pengguna.
+    2. Gunakan tool ini untuk memberikan penjelasan terkait kepada pengguna.
 
     Args:
-        question (str): The question to ask the human.
+        message (str): The message to deliver to the human.
 
     Returns:
         str: The human's input.
     """
-    return input(f"{question} ")
+    return input(f"{message} ")
 
 @tool
 def ask_ai(question):
