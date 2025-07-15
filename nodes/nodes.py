@@ -70,7 +70,7 @@ def react_agent(state:PlanExecute):
         The updated state with the plan.
     """
     callback_handler = StopOnToolCallback(stop_on_tool="interact_with_human")
-    react_agent_chain = create_react_agent_chain(callback_handler)
+    react_agent_chain = create_react_agent_chain(callback_handler, [ask_ai, interact_with_human])
     state["curr_state"] = "processing_react_agent"
     print("React agent step")
     pprint("--------------------")

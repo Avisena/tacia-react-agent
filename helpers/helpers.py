@@ -59,13 +59,13 @@ def insert_observation_for_last_interact_human(intermediate_steps, observation):
             action, existing_observation = step
             if hasattr(action, 'tool') and action.tool == 'interact_with_human':
                 # Update the observation
-                intermediate_steps[i] = (action, f"respon manusia: {observation}")
+                intermediate_steps[i] = (action, f"klien menjawab: {observation}")
                 return intermediate_steps
         
         # Case 2: step is just an AgentAction (no observation yet)
         elif hasattr(step, 'tool') and step.tool == 'interact_with_human':
             # Convert to tuple with observation
-            intermediate_steps[i] = (step, f"respon manusia: {observation}")
+            intermediate_steps[i] = (step, f"klien menjawab: {observation}")
             return intermediate_steps
     
     return intermediate_steps

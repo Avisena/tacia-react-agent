@@ -15,12 +15,7 @@ def interact_with_human(message):
     """
     1.  Gunakan tool ini ketika kamu membutuhkan informasi tambahan dari manusia yang tidak tersedia dalam pertanyaan awal. Misalnya, saat informasi tidak lengkap, ambigu, atau butuh klarifikasi lanjutan dari penanya untuk bisa menjawab dengan akurat. Tool ini akan mengajukan pertanyaan langsung ke manusia.
 
-        Tool ini sangat penting untuk menghindari asumsi yang salah dalam konteks perpajakan.
-
-        Contoh penggunaan:
-        - Menanyakan sumber penghasilan jika hanya disebut "penghasilan 50 juta".
-        - Meminta rincian apakah transaksi termasuk PPN.
-        - Klarifikasi apakah donasi dilakukan ke lembaga resmi yang diakui negara.
+        Tool ini sangat penting untuk menghindari asumsi yang salah dalam konteks hukum pidana.
 
     2. Gunakan tool ini untuk memberikan penjelasan terkait kepada pengguna.
 

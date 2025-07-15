@@ -24,7 +24,7 @@ if "total_cost" not in st.session_state:
 st.markdown("""
     <div class="hero-container">
         <h1 class="title">💬 Konsultan Hukum Pidana AI</h1>
-        <p class="subtitle">Tanyakan apa pun tentang hukum.</p>
+        <p class="subtitle">Tanyakan apa pun tentang kasus anda</p>
     </div>
     <style>
         .hero-container {
