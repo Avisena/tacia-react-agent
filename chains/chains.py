@@ -89,7 +89,8 @@ def create_conversational_chain():
     Berikut adalah riwayat percakapan:
     {chat_history}
 
-    Berdasarkan percakapan di atas, berikan respons singkat saja. Gunakan bahasa yang kasual tapi tetap profesional.
+    Berdasarkan percakapan di atas, berikan jawaban singkat saja. Gunakan bahasa yang kasual tapi tetap profesional.
+    Berikan jawaban saja tanpa hal lain.
     """
     )
     llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", api_key = openai_api_key)
