@@ -80,6 +80,23 @@ def create_planner_chain():
     planner = planner_prompt | planner_llm.with_structured_output(Plan)
     return planner
 
+def create_conversational_chain():
+    prompt = PromptTemplate(
+        input_variables=["chat_history"],
+        template="""
+    Kamu adalah konsultan pajak ahli di Indonesia. Tugasmu adalah membantu pengguna menjawab pertanyaan perpajakan dengan jelas, akurat, dan sesuai peraturan yang berlaku.
+
+    Berikut adalah riwayat percakapan:
+    {chat_history}
+
+    Berdasarkan percakapan di atas, berikan respons singkat saja. Gunakan bahasa yang kasual tapi tetap profesional.
+    """
+    )
+    llm = ChatOpenAI(temperature=0, model_name="gpt-4o-mini", api_key = openai_api_key)
+    chain = LLMChain(llm=llm, prompt=prompt, verbose=True)
+    return chain
+
+
 def create_react_agent_chain(callback_handler):
 
     prompt = hub.pull("hwchase17/react")
@@ -93,10 +110,10 @@ def create_react_agent_chain(callback_handler):
     Use the following format:
 
     Question: pertanyaan hukum yang perlu dijawab. Tujuan akhirmu adalah menjawab pertanyaan ini.   
-    Thought: Gunakan penalaranmu untuk menjawab pertanyaan klien dari observasi deduktifmu. Pertimbangkan aturan perpajakan yang relevan dan informasi dari klien
+    Thought: Gunakan penalaranmu untuk menjawab pertanyaan klien dari observasi deduktifmu. Pertimbangkan aturan perpajakan yang relevan dan informasi dari klien.
     Action: Harus salah satu dari [{tool_names}]. Nama fungsi/tool yang akan dipakai — hanya nama fungsi saja, tanpa tanda kurung atau parameter
     Action Input: Parameter Input untuk Action
-    Observation: Umpan balik dari action input
+    Observation: Umpan balik dari action input. 
     ... (this Thought/Action/Action Input/Observation can repeat N times)  
     Thought: I now know the answer.
     Final Answer: Jawaban akan pertanyaan. Tuangkan hasil reasoning anda dari Thought disertai pasal hukumnya secara terstruktur dan rapi.
@@ -200,5 +217,6 @@ process_memory_chain = create_memory_process_chain()
 planner_chain = create_planner_chain()
 self_reflection_chain = create_self_reflection_chain()
 semantic_summary_chain = create_semantic_summary_chain()
+conversational_chain = create_conversational_chain()
 # callback_handler = StopOnToolCallback(stop_on_tool="interact_with_human")
 # react_agent_chain = create_react_agent_chain(callback_handler)

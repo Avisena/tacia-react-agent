@@ -2,8 +2,8 @@ from pprint import pprint
 from typing_extensions import TypedDict
 from langchain.agents.agent import AgentAction, AgentFinish
 from typing import List, TypedDict
-from helpers.helpers import get_last_tool_input, insert_observation_for_last_interact_human, clean_agent_log, get_last_user_message, get_last_log
-from chains.chains import process_memory_chain, planner_chain, create_react_agent_chain, self_reflection_chain, semantic_summary_chain
+from helpers.helpers import get_last_tool_input, insert_observation_for_last_interact_human, clean_agent_log, get_last_user_message, get_last_log, format_chat_history, is_question
+from chains.chains import process_memory_chain, planner_chain, create_react_agent_chain, self_reflection_chain, semantic_summary_chain, conversational_chain
 from callbacks.callbacks import StopOnToolCallback
 from tools.tools import ask_ai, interact_with_human, search_web
 
@@ -104,6 +104,16 @@ def react_agent(state:PlanExecute):
         state['chat_history'].append({"role": "assistant", "content": get_last_tool_input(callback_handler.intermediate_steps)})
     return state
 
+def conversational_agent(state: PlanExecute):
+    print("Conversational step")
+    pprint("--------------------")
+    formatted_history = format_chat_history(state['chat_history'])
+    response = conversational_chain.invoke({"chat_history": formatted_history})
+    state['response'] = response["text"]
+    state["chat_history"].append({"role": "assistant", "content": state["response"]})
+    return state
+
+
 def self_reflection(state: PlanExecute):
     state["curr_state"] = "self_reflection"
     print("self_reflection step")
@@ -134,6 +144,8 @@ def is_self_reflection(state: PlanExecute):
 def is_processing_react_agent(state: PlanExecute):
     label = state.get("curr_state")
     if label == "processing_react_agent":
+        if (is_question(get_last_user_message(state['chat_history']))):
+            return "processing_react_agent_and_question"
         print("INTERMEDIATE_STEPS: ", state['intermediate_steps'])
         print("CHAT_HISTORY: ", state['chat_history'])
         print(get_last_user_message(state['chat_history']))

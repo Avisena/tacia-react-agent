@@ -16,6 +16,26 @@ def get_last_log(intermediate_steps, tool_name=None):
             return action.log
     return None
 
+def is_question(text: str) -> bool:
+    """
+    Returns True if the text appears to be a question (contains '?'),
+    otherwise False.
+    """
+    # Look for at least one "?" character
+    return bool(re.search(r'\?', text))
+
+def format_chat_history(chat_history):
+    role_map = {
+        "user": "User",
+        "assistant": "Tacia",
+        "assistant_reasoning": "Tacia (penalaran)"
+    }
+    return "\n".join(
+        f"{role_map.get(msg['role'], msg['role'])}: {msg['content']}"
+        for msg in chat_history
+    )
+
+
 def insert_observation_for_last_interact_human(intermediate_steps, observation):
     """
     Insert observation for the last interact_with_human tool in intermediate steps
@@ -39,13 +59,13 @@ def insert_observation_for_last_interact_human(intermediate_steps, observation):
             action, existing_observation = step
             if hasattr(action, 'tool') and action.tool == 'interact_with_human':
                 # Update the observation
-                intermediate_steps[i] = (action, f"User menjawab: {observation}")
+                intermediate_steps[i] = (action, f"respon manusia: {observation}")
                 return intermediate_steps
         
         # Case 2: step is just an AgentAction (no observation yet)
         elif hasattr(step, 'tool') and step.tool == 'interact_with_human':
             # Convert to tuple with observation
-            intermediate_steps[i] = (step, f"User menjawab: {observation}")
+            intermediate_steps[i] = (step, f"respon manusia: {observation}")
             return intermediate_steps
     
     return intermediate_steps

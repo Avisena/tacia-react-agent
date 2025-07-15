@@ -5,7 +5,7 @@ from typing_extensions import TypedDict
 from typing import List, TypedDict
 
 ### Helper functions for the notebook
-from nodes.nodes import planner, process_memory, react_agent, self_reflection, is_self_reflection, is_processing_react_agent, semantic_summary
+from nodes.nodes import planner, process_memory, react_agent, self_reflection, is_self_reflection, is_processing_react_agent, semantic_summary, conversational_agent
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 groq_api_key = st.secrets["GROQ_API_KEY"]
@@ -33,6 +33,7 @@ def create_agent():
     agent_workflow.add_node("start", RunnableLambda(lambda state: state))
     # agent_workflow.add_node("semantic_summary", semantic_summary)
     agent_workflow.add_node("process_memory", process_memory)
+    agent_workflow.add_node("conversational_agent", conversational_agent)
     agent_workflow.add_node("react_agent", react_agent)
     agent_workflow.add_node("self_reflection", self_reflection)
 
@@ -43,8 +44,10 @@ def create_agent():
         {
             "processing_react_agent": "react_agent",
             "not_processing_react_agent": "process_memory",
+            "processing_react_agent_and_question": "conversational_agent"
         }
     )
+    agent_workflow.add_edge("conversational_agent", END)
     # agent_workflow.add_edge("process_memory", "react_agent")
     # agent_workflow.add_edge("react_agent", "self_reflection")
     agent_workflow.add_edge("process_memory", "react_agent")
