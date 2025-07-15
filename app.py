@@ -23,8 +23,8 @@ if "total_cost" not in st.session_state:
 # --- PAGE HEADER ---
 st.markdown("""
     <div class="hero-container">
-        <h1 class="title">💬 Konsultan Pajak AI</h1>
-        <p class="subtitle">Tanyakan apa pun tentang PPh, PPN, atau kewajiban pajak Anda.</p>
+        <h1 class="title">💬 Konsultan Hukum Pidana AI</h1>
+        <p class="subtitle">Tanyakan apa pun hukum.</p>
     </div>
     <style>
         .hero-container {
@@ -197,7 +197,7 @@ st.markdown('</div>', unsafe_allow_html=True)  # Close main-content
 # --- FIXED INPUT CONTAINER ---
 st.markdown('<div class="input-container">', unsafe_allow_html=True)
 
-question = st.chat_input("Tulis pertanyaan pajak Anda...")
+question = st.chat_input("Tulis pertanyaan hukum pidana Anda...")
 
 st.markdown('</div>', unsafe_allow_html=True)  # Close input-container
 

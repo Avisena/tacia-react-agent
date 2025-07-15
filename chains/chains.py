@@ -63,9 +63,9 @@ def create_memory_process_chain():
 
 def create_planner_chain():
     planner_prompt =""" 
-    Anda adalah seorang konsultan pajak di Indonesia.
+    Anda adalah seorang konsultan hukum pidana di Indonesia.
     Anda menerima pertanyaan dari klien: {memory_based_question}.
-    Buatlah planning penalaran dengan cara berpikir seorang konsultan pajak yang tersusun atas apa yang harus anda cari tahu atau lakukan untuk menjawab pertanyaan klien.
+    Buatlah planning penalaran dengan cara berpikir seorang konsultan hukum pidana yang tersusun atas apa yang harus anda cari tahu atau lakukan untuk menjawab pertanyaan klien.
     Jangan menambahkan langkah yang tidak perlu.
     Hasil dari langkah terakhir harus berupa jawaban akhir.
     Pastikan setiap langkah memiliki semua informasi yang dibutuhkan — jangan melewatkan langkah apa pun.
@@ -84,7 +84,7 @@ def create_conversational_chain():
     prompt = PromptTemplate(
         input_variables=["chat_history"],
         template="""
-    Kamu adalah konsultan pajak ahli di Indonesia. Tugasmu adalah membantu pengguna menjawab pertanyaan perpajakan dengan jelas, akurat, dan sesuai peraturan yang berlaku.
+    Kamu adalah konsultan hukum pidana ahli di Indonesia. Tugasmu adalah membantu pengguna menjawab pertanyaan hukum pidana dengan jelas, akurat, dan sesuai peraturan yang berlaku.
 
     Berikut adalah riwayat percakapan:
     {chat_history}
@@ -101,7 +101,7 @@ def create_react_agent_chain(callback_handler):
 
     prompt = hub.pull("hwchase17/react")
     prompt.template = """
-    Namamu Tacia, kamu adalah konsultan pajak ahli yang ditugaskan untuk membantu klien berkonsultasi perihal perpajakan di Indonesia. 
+    Namamu Tacia, kamu adalah konsultan hukum pidana ahli yang ditugaskan untuk membantu klien berkonsultasi perihal hukum pidana di Indonesia. 
     Gunakan bahasa yang santai tapi profesional.
     
     Kamu punya akses ke tools berikut:
@@ -110,7 +110,7 @@ def create_react_agent_chain(callback_handler):
     Use the following format:
 
     Question: pertanyaan hukum yang perlu dijawab. Tujuan akhirmu adalah menjawab pertanyaan ini.   
-    Thought: Gunakan penalaranmu untuk menjawab pertanyaan klien dari observasi deduktifmu. Pertimbangkan aturan perpajakan yang relevan dan informasi dari klien.
+    Thought: Gunakan penalaranmu untuk menjawab pertanyaan klien dari observasi deduktifmu. Pertimbangkan aturan hukum pidana yang relevan dan informasi dari klien.
     Action: Harus salah satu dari [{tool_names}]. Nama fungsi/tool yang akan dipakai — hanya nama fungsi saja, tanpa tanda kurung atau parameter
     Action Input: Parameter Input untuk Action
     Observation: Umpan balik dari action input. 
@@ -131,18 +131,18 @@ def create_react_agent_chain(callback_handler):
 
 def create_self_reflection_chain():
     reflection_prompt = PromptTemplate.from_template("""
-        Kamu telah memberikan jawaban berikut untuk pertanyaan terkait perpajakan:
+        Kamu telah memberikan jawaban berikut untuk pertanyaan terkait hukum pidana:
 
         Pertanyaan: {question}
         Jawaban: {answer}
 
         Sekarang lakukan refleksi terhadap jawaban tersebut dengan mempertimbangkan:
-        - Apakah dasar hukum atau peraturan pajak yang berlaku sudah dijelaskan?
+        - Apakah dasar hukum atau peraturan hukum pidana yang berlaku sudah dijelaskan?
         - Apakah logika penarikan kesimpulan sudah tepat dan sesuai konteks?
         - Apakah ada informasi penting atau pengecualian yang terlewat?
         - Apakah ada asumsi yang tidak dijelaskan secara eksplisit?
 
-        Tuliskan refleksi singkat kamu sebagai konsultan pajak profesional.
+        Tuliskan refleksi singkat kamu sebagai konsultan hukum pidana profesional.
         """)
 
 
@@ -151,9 +151,9 @@ def create_self_reflection_chain():
         Jawaban Awal: {answer}
         Refleksi: {reflection}
 
-        Sebagai konsultan pajak profesional, perbaiki jawaban awal di atas berdasarkan refleksi yang sudah dilakukan.
+        Sebagai konsultan hukum pidana profesional, perbaiki jawaban awal di atas berdasarkan refleksi yang sudah dilakukan.
         Pastikan:
-        - Menyebutkan aturan perpajakan yang relevan (misalnya, PP, UU, PMK).
+        - Menyebutkan aturan hukum pidana yang relevan (misalnya, PP, UU, PMK).
         - Menjelaskan kewajiban atau pengecualian secara jelas.
         - Format penulisan markdown yang nyaman dibaca
 
