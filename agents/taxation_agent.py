@@ -8,7 +8,7 @@ from typing import List, TypedDict
 from nodes.nodes import planner, process_memory, react_agent, self_reflection, is_self_reflection, is_processing_react_agent, semantic_summary, conversational_agent
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-groq_api_key = st.secrets["GROQ_API_KEY"]
+# groq_api_key = st.secrets["GROQ_API_KEY"]
     
 class PlanExecute(TypedDict):
     curr_state: str
