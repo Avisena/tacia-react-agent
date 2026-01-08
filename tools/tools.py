@@ -8,7 +8,7 @@ import streamlit as st
 
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-groq_api_key = st.secrets["GROQ_API_KEY"]
+# groq_api_key = st.secrets["GROQ_API_KEY"]
 
 @tool
 def interact_with_human(message):
