@@ -22,7 +22,7 @@ from langchain.chains import LLMChain
 
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-groq_api_key = st.secrets["GROQ_API_KEY"]
+# groq_api_key = st.secrets["GROQ_API_KEY"]
 
 class Plan(BaseModel):
         """Plan to follow in future"""
